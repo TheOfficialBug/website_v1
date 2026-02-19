@@ -1,0 +1,982 @@
+<html lang="en" class="scroll-smooth"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kunal Suresh | CS &amp; XR Portfolio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.iconify.design/3/3.1.0/iconify.min.js"></script>
+    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&amp;family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&amp;family=Bricolage+Grotesque:wght@300;400;500;600;700&amp;family=Space+Mono:wght@400;700&amp;display=swap" rel="stylesheet">
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .font-serif { font-family: 'Playfair Display', serif; }
+        .font-bricolage { font-family: 'Bricolage Grotesque', sans-serif !important; }
+        .font-mono { font-family: 'Space Mono', monospace !important; }
+        
+        /* Custom Scrollbar for Chat */
+        .chat-scroll::-webkit-scrollbar { width: 4px; }
+        .chat-scroll::-webkit-scrollbar-track { background: transparent; }
+        .chat-scroll::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
+        .chat-scroll::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.2); }
+        
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        /* Hero Animations */
+        @keyframes cinematicEntrance {
+            0% { transform: scale(1.4); filter: blur(20px) grayscale(100%); opacity: 0; }
+            20% { opacity: 1; }
+            100% { transform: scale(1); filter: blur(0px) grayscale(0%); opacity: 1; }
+        }
+        .animate-cinematic { animation: cinematicEntrance 3.5s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+        
+        @keyframes slideUpFade {
+            0% { opacity: 0; transform: translateY(40px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        .animate-slide-up { animation: slideUpFade 1s ease-out forwards; }
+        
+        /* Scroll Animations */
+        @keyframes animationIn {
+            0% { opacity: 0; transform: translateY(30px) scale(0.98); filter: blur(8px); }
+            100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0px); }
+        }
+        .animate-on-scroll { opacity: 0; }
+        .animate-on-scroll.animate { animation: animationIn 0.8s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
+        
+        /* Card Shimmer */
+        @keyframes shimmerMove {
+            0% { transform: translateX(-150%) skewX(-20deg); }
+            100% { transform: translateX(200%) skewX(-20deg); }
+        }
+        .animate-shimmer-effect {
+            animation: shimmerMove 3s ease-in-out infinite;
+            animation-delay: 2s;
+        }
+
+        /* Typing Indicator */
+        .typing-dot { animation: typing 1.4s infinite ease-in-out both; }
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+        @keyframes typing {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1); }
+        }
+
+        /* Accordion Transition */
+        .accordion-content { transition: max-height 0.3s ease-out, opacity 0.3s ease-out; max-height: 0; opacity: 0; overflow: hidden; }
+        .accordion-content.open { max-height: 200px; opacity: 1; }
+
+        /* Grain & Glow */
+        .bg-grain { position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: 0.04; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E"); }
+        .glass-panel { background: rgba(23, 23, 23, 0.6); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
+        
+        /* Text Reveal Animation */
+        .word-reveal span { display: inline-block; opacity: 0; transform: translateY(100%); animation: reveal 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
+        @keyframes reveal { to { opacity: 1; transform: translateY(0); } }
+
+        /* Form Inputs */
+        .input-base {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.2s ease;
+        }
+        .input-base:focus {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: #6366f1;
+            outline: none;
+            box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.2);
+        }
+
+        /* Game Canvas */
+        #game-canvas { width: 100%; height: 100%; display: block; }
+        .scanline {
+            width: 100%; height: 100px; z-index: 10;
+            background: linear-gradient(0deg, rgba(0,0,0,0) 0%, rgba(99, 102, 241, 0.1) 50%, rgba(0,0,0,0) 100%);
+            opacity: 0.1; position: absolute; bottom: 100%;
+            animation: scanline 10s linear infinite; pointer-events: none;
+        }
+        @keyframes scanline { 0% { bottom: 100%; } 100% { bottom: -100%; } }
+    </style>
+
+    <script>
+        (function () {
+            if (!window.__inViewIO) {
+                window.__inViewIO = new IntersectionObserver((entries) => {
+                    entries.forEach((entry) => {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add("animate");
+                        }
+                    });
+                }, { threshold: 0.1, rootMargin: "0px 0px -10% 0px" });
+            }
+            window.initInViewAnimations = function (selector = ".animate-on-scroll") {
+                document.querySelectorAll(selector).forEach((el) => {
+                    window.__inViewIO.observe(el);
+                });
+            };
+            document.addEventListener("DOMContentLoaded", () => {
+                initInViewAnimations();
+                // Word splitter for animations
+                document.querySelectorAll('.word-anim').forEach(el => {
+                    const text = el.innerText;
+                    el.innerHTML = text.split(' ').map((word, i) => `<span style="animation-delay: ${i * 0.05}s">${word}&nbsp;</span>`).join('');
+                    el.classList.add('word-reveal');
+                });
+
+                initChat();
+                initAccordion();
+                initContactForm();
+                initCyberGame();
+            });
+        })();
+        
+        // Chat Logic
+        function initChat() {
+            const chatInput = document.getElementById('chat-input');
+            const chatSend = document.getElementById('chat-send');
+            const chatBox = document.getElementById('chat-box');
+            
+            const knowledgeBase = {
+                "experience": "Kunal is currently a Graduate Research Assistant at Iowa State University. Previously, he worked as an SDE-1 at HoloWorld creating VR simulations and at Bridge Labs as a WebDev Intern.",
+                "skills": "His tech stack includes Python, C#, Kotlin, Unity3D, Django, Docker, and Apache Spark.",
+                "contact": "You can reach Kunal at kunalsuresh25@gmail.com or via LinkedIn.",
+                "projects": "Notable projects include F1 Telemetry Analysis, OCT Disease Classification using Federated Learning, and various VR simulations.",
+                "default": "I can tell you about Kunal's experience in XR, Data Science, his projects, or how to contact him. What would you like to know?"
+            };
+
+            function appendMessage(text, isUser) {
+                const msgDiv = document.createElement('div');
+                msgDiv.className = `flex w-full ${isUser ? 'justify-end' : 'justify-start'} animate-slide-up mb-4`;
+                msgDiv.innerHTML = `
+                    <div class="${isUser ? 'bg-indigo-600/20 border-indigo-500/30' : 'bg-white/5 border-white/10'} border backdrop-blur-md rounded-2xl px-5 py-3 max-w-[80%] text-sm font-light text-white/90">
+                        ${text}
+                    </div>
+                `;
+                chatBox.appendChild(msgDiv);
+                chatBox.scrollTop = chatBox.scrollHeight;
+            }
+
+            function showTyping() {
+                const typingDiv = document.createElement('div');
+                typingDiv.id = 'typing-indicator';
+                typingDiv.className = 'flex w-full justify-start animate-slide-up mb-4';
+                typingDiv.innerHTML = `
+                    <div class="bg-white/5 border border-white/10 backdrop-blur-md rounded-2xl px-4 py-3 flex gap-1">
+                        <div class="w-1.5 h-1.5 bg-white/40 rounded-full typing-dot"></div>
+                        <div class="w-1.5 h-1.5 bg-white/40 rounded-full typing-dot"></div>
+                        <div class="w-1.5 h-1.5 bg-white/40 rounded-full typing-dot"></div>
+                    </div>
+                `;
+                chatBox.appendChild(typingDiv);
+                chatBox.scrollTop = chatBox.scrollHeight;
+                return typingDiv;
+            }
+
+            function processInput() {
+                const text = chatInput.value.trim().toLowerCase();
+                if (!text) return;
+
+                appendMessage(chatInput.value, true);
+                chatInput.value = '';
+                
+                const typing = showTyping();
+
+                setTimeout(() => {
+                    typing.remove();
+                    let response = knowledgeBase.default;
+                    if (text.includes('experience') || text.includes('work') || text.includes('job')) response = knowledgeBase.experience;
+                    else if (text.includes('skill') || text.includes('stack') || text.includes('tech')) response = knowledgeBase.skills;
+                    else if (text.includes('contact') || text.includes('email') || text.includes('reach')) response = knowledgeBase.contact;
+                    else if (text.includes('project')) response = knowledgeBase.projects;
+                    
+                    appendMessage(response, false);
+                }, 1500);
+            }
+
+            chatSend.addEventListener('click', processInput);
+            chatInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') processInput(); });
+        }
+
+        // Accordion Logic
+        function initAccordion() {
+            const buttons = document.querySelectorAll('.accordion-btn');
+            buttons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const content = btn.nextElementSibling;
+                    const icon = btn.querySelector('iconify-icon');
+                    
+                    document.querySelectorAll('.accordion-content').forEach(c => {
+                        if (c !== content) {
+                            c.classList.remove('open');
+                            c.previousElementSibling.querySelector('iconify-icon').classList.remove('rotate-180');
+                        }
+                    });
+
+                    content.classList.toggle('open');
+                    icon.classList.toggle('rotate-180');
+                });
+            });
+        }
+
+        // Contact Form Logic
+        function initContactForm() {
+            const form = document.getElementById('contact-form');
+            const btn = document.getElementById('submit-btn');
+
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const inputs = form.querySelectorAll('input, textarea');
+                let valid = true;
+                inputs.forEach(input => { if (!input.value) valid = false; });
+                if (!valid) return;
+
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '<iconify-icon icon="solar:spinner-linear" class="animate-spin text-lg"></iconify-icon>';
+                btn.disabled = true;
+
+                setTimeout(() => {
+                    btn.innerHTML = 'Message Sent';
+                    btn.classList.add('bg-green-500/20', 'text-green-400', 'border-green-500/50');
+                    btn.classList.remove('hover:bg-indigo-500');
+                    form.reset();
+                    setTimeout(() => {
+                        btn.innerHTML = originalText;
+                        btn.disabled = false;
+                        btn.classList.remove('bg-green-500/20', 'text-green-400', 'border-green-500/50');
+                        btn.classList.add('hover:bg-indigo-500');
+                    }, 3000);
+                }, 1500);
+            });
+        }
+
+        // 3D Cyber Game Logic
+        function initCyberGame() {
+            const canvas = document.getElementById('game-canvas');
+            const ctx = canvas.getContext('2d');
+            const scoreEl = document.getElementById('game-score');
+            const startBtn = document.getElementById('game-start-btn');
+            const overlay = document.getElementById('game-overlay');
+
+            let width, height;
+            let playing = false;
+            let score = 0;
+            let speed = 4;
+            let mouse = { x: 0, y: 0 };
+            
+            // Entities
+            const particles = [];
+            const obstacles = [];
+            const coins = [];
+            
+            function resize() {
+                width = canvas.width = canvas.offsetWidth;
+                height = canvas.height = canvas.offsetHeight;
+                mouse.x = width / 2;
+                mouse.y = height / 2;
+            }
+            window.addEventListener('resize', resize);
+            resize();
+
+            // 3D Projection Helpers
+            const fov = 350;
+            function project3D(x, y, z) {
+                const scale = fov / (fov + z);
+                return {
+                    x: width / 2 + x * scale,
+                    y: height / 2 + y * scale,
+                    scale: scale
+                };
+            }
+
+            // Game Classes
+            class Star {
+                constructor() {
+                    this.x = (Math.random() - 0.5) * width * 3;
+                    this.y = (Math.random() - 0.5) * height * 3;
+                    this.z = Math.random() * 2000 + 500;
+                }
+                update() {
+                    this.z -= speed * 4;
+                    if (this.z < 1) this.z = 2000;
+                }
+                draw() {
+                    const p = project3D(this.x, this.y, this.z);
+                    const alpha = Math.min(1, (2000 - this.z) / 1000);
+                    ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
+                    ctx.fillRect(p.x, p.y, 2 * p.scale, 2 * p.scale);
+                }
+            }
+
+            class Obstacle {
+                constructor() {
+                    this.x = (Math.random() - 0.5) * width * 1.5;
+                    this.y = (Math.random() - 0.5) * height * 1.5;
+                    this.z = 2000;
+                    this.size = 60;
+                }
+                update() {
+                    this.z -= speed * 5;
+                    // Rotation effect
+                    const p = project3D(this.x, this.y, this.z);
+                    // Collision check
+                    if (this.z < 100 && this.z > 0) {
+                        const dx = mouse.x - p.x;
+                        const dy = mouse.y - p.y;
+                        const dist = Math.sqrt(dx*dx + dy*dy);
+                        if (dist < 40) gameOver();
+                    }
+                    return this.z > 0;
+                }
+                draw() {
+                    const p = project3D(this.x, this.y, this.z);
+                    const s = this.size * p.scale;
+                    ctx.strokeStyle = `rgba(239, 68, 68, ${Math.min(1, (2000 - this.z) / 500)})`; // Red
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(p.x - s/2, p.y - s/2, s, s);
+                    
+                    // Inner X
+                    ctx.beginPath();
+                    ctx.moveTo(p.x - s/3, p.y - s/3);
+                    ctx.lineTo(p.x + s/3, p.y + s/3);
+                    ctx.moveTo(p.x + s/3, p.y - s/3);
+                    ctx.lineTo(p.x - s/3, p.y + s/3);
+                    ctx.stroke();
+                }
+            }
+
+            class Coin {
+                constructor() {
+                    this.x = (Math.random() - 0.5) * width * 1.2;
+                    this.y = (Math.random() - 0.5) * height * 1.2;
+                    this.z = 2000;
+                    this.size = 30;
+                }
+                update() {
+                    this.z -= speed * 5;
+                    const p = project3D(this.x, this.y, this.z);
+                    if (this.z < 100 && this.z > 0) {
+                        const dx = mouse.x - p.x;
+                        const dy = mouse.y - p.y;
+                        const dist = Math.sqrt(dx*dx + dy*dy);
+                        if (dist < 50) {
+                            score += 100;
+                            scoreEl.innerText = score;
+                            return false; // Collected
+                        }
+                    }
+                    return this.z > 0;
+                }
+                draw() {
+                    const p = project3D(this.x, this.y, this.z);
+                    const s = this.size * p.scale;
+                    ctx.fillStyle = `rgba(99, 102, 241, ${Math.min(1, (2000 - this.z) / 500)})`; // Indigo
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, s, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    // Glow
+                    ctx.shadowBlur = 10;
+                    ctx.shadowColor = '#6366f1';
+                    ctx.fill();
+                    ctx.shadowBlur = 0;
+                }
+            }
+
+            // Init Stars
+            for(let i=0; i<150; i++) particles.push(new Star());
+
+            function gameOver() {
+                playing = false;
+                overlay.style.display = 'flex';
+                startBtn.innerHTML = `System Crash! Score: ${score}<br><span class="text-sm opacity-60">Click to Reboot</span>`;
+            }
+
+            function gameLoop() {
+                if (!playing) return;
+                
+                ctx.fillStyle = 'rgba(10, 10, 10, 0.3)'; // Trail effect
+                ctx.fillRect(0, 0, width, height);
+                
+                // Grid lines (floor/ceiling illusion)
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+                ctx.lineWidth = 1;
+                const time = Date.now() * 0.002;
+                
+                // Update and Draw Stars
+                particles.forEach(p => { p.update(); p.draw(); });
+
+                // Spawners
+                if (Math.random() < 0.02) obstacles.push(new Obstacle());
+                if (Math.random() < 0.03) coins.push(new Coin());
+
+                // Update Entities (Reverse order to draw far objects first)
+                for (let i = obstacles.length - 1; i >= 0; i--) {
+                    if (!obstacles[i].update()) obstacles.splice(i, 1);
+                    else obstacles[i].draw();
+                }
+                for (let i = coins.length - 1; i >= 0; i--) {
+                    if (!coins[i].update()) coins.splice(i, 1);
+                    else coins[i].draw();
+                }
+
+                // Draw Player (Cursor)
+                ctx.fillStyle = 'white';
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = 'white';
+                ctx.beginPath();
+                ctx.arc(mouse.x, mouse.y, 6, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Ring around player
+                ctx.strokeStyle = '#6366f1';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(mouse.x, mouse.y, 20, time, time + Math.PI * 1.5);
+                ctx.stroke();
+                ctx.shadowBlur = 0;
+
+                score++;
+                if (score % 10 === 0) scoreEl.innerText = score;
+                speed = 4 + (score / 2000);
+
+                requestAnimationFrame(gameLoop);
+            }
+
+            // Input Handling
+            canvas.addEventListener('mousemove', (e) => {
+                const rect = canvas.getBoundingClientRect();
+                mouse.x = e.clientX - rect.left;
+                mouse.y = e.clientY - rect.top;
+            });
+            canvas.addEventListener('touchmove', (e) => {
+                const rect = canvas.getBoundingClientRect();
+                mouse.x = e.touches[0].clientX - rect.left;
+                mouse.y = e.touches[0].clientY - rect.top;
+                e.preventDefault();
+            }, { passive: false });
+
+            startBtn.addEventListener('click', () => {
+                score = 0;
+                speed = 4;
+                obstacles.length = 0;
+                coins.length = 0;
+                scoreEl.innerText = '0';
+                overlay.style.display = 'none';
+                playing = true;
+                requestAnimationFrame(gameLoop);
+            });
+        }
+
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        neutral: { 900: '#171717', 950: '#0a0a0a' },
+                        indigo: { 500: '#6366f1', 900: '#312e81' }
+                    }
+                }
+            }
+        };
+    </script>
+<meta name="disabled-font-classes" content="font-roboto,font-montserrat,font-poppins,font-playfair,font-instrument-serif,font-merriweather,font-jakarta,font-manrope,font-space-grotesk,font-work-sans,font-pt-serif,font-geist-mono,font-space-mono,font-quicksand,font-nunito,font-newsreader,font-google-sans-flex,font-oswald,font-cormorant,font-dm-sans"><link id="all-fonts-link-font-bricolage" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@300;400;500;600;700&amp;display=swap"><style id="all-fonts-style-font-bricolage">.font-bricolage { font-family: 'Bricolage Grotesque', sans-serif !important; }</style><link id="all-fonts-link-font-geist" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&amp;display=swap"><style id="all-fonts-style-font-geist">.font-geist { font-family: 'Geist', sans-serif !important; }</style></head>
+
+<body class="w-full overflow-x-hidden selection:bg-indigo-500/30 selection:text-white relative font-sans bg-neutral-950 text-neutral-50">
+    
+    <div class="bg-grain"></div>
+
+    <!-- Navigation -->
+    <div class="fixed flex animate-slide-up [animation-delay:0.5s] z-50 opacity-0 top-6 right-0 left-0 justify-center pointer-events-none">
+        <nav class="pointer-events-auto flex transition-all duration-300 w-auto md:min-w-[400px] border rounded-full py-2 px-6 shadow-2xl backdrop-blur-xl items-center justify-between gap-8 bg-neutral-900/80 border-white/10">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-full bg-indigo-500 flex items-center justify-center text-white">
+                    <span class="font-bold text-xs font-geist">KS</span>
+                </div>
+            </div>
+            <div class="hidden md:flex items-center gap-6 text-xs font-medium tracking-widest uppercase text-white/60">
+                <a href="#experience" class="transition-colors font-geist hover:text-white">Exp</a>
+                <a href="#projects" class="transition-colors font-geist hover:text-white">Work</a>
+                <a href="#skills" class="transition-colors font-geist hover:text-white">Stack</a>
+                <a href="#qa" class="transition-colors font-geist hover:text-white">FAQ</a>
+                <a href="#contact" class="transition-colors font-geist hover:text-white">Contact</a>
+            </div>
+            <a href="mailto:kunalsuresh25@gmail.com" class="w-8 h-8 rounded-full flex items-center justify-center transition-colors text-white/70 hover:text-white hover:bg-white/10">
+                <iconify-icon icon="solar:letter-linear" width="20"></iconify-icon>
+            </a>
+        </nav>
+    </div>
+
+    <!-- Hero Section -->
+    <header class="relative w-full overflow-hidden flex flex-col justify-end pb-12 md:pb-24 min-h-screen">
+        <!-- Background -->
+        <div class="absolute inset-0 z-0 bg-neutral-950">
+            <img src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&amp;w=2072&amp;auto=format&amp;fit=crop" class="w-full h-full object-cover animate-cinematic opacity-0 mix-blend-screen" alt="Space Data">
+            <div class="absolute inset-0 bg-gradient-to-t to-transparent from-neutral-950 via-neutral-950/80"></div>
+            <div class="bg-neutral-950/40 absolute top-0 right-0 bottom-0 left-0"></div>
+        </div>
+
+        <div class="relative z-10 w-full max-w-[90rem] mx-auto px-6 md:px-12 grid grid-cols-1 md:grid-cols-12 gap-6 items-end">
+            <div class="md:col-span-8 relative">
+                <div class="flex items-center gap-3 mb-6 animate-slide-up [animation-delay:1.2s] opacity-0">
+                    <span class="h-[1px] w-8 bg-indigo-500"></span>
+                    <span class="text-xs font-mono uppercase tracking-widest font-geist text-indigo-400"> CS Master's • Full Stack • XR </span>
+                </div>
+                <h1 class="font-bricolage leading-[0.85] tracking-tight font-semibold text-white">
+                    <span class="block text-[12vw] md:text-[8rem] lg:text-[10rem] animate-slide-up [animation-delay:1.4s] opacity-0 mix-blend-normal drop-shadow-2xl font-geist font-semibold tracking-wide text-white"> KUNAL </span>
+                    <div class="flex items-baseline gap-4 md:gap-8 -mt-2 md:-mt-6 animate-slide-up [animation-delay:1.6s] opacity-0">
+                        <span class="text-[12vw] md:text-[8rem] lg:text-[10rem] opacity-50 blur-[1px] font-geist font-semibold tracking-wide text-white/60"> &amp; </span>
+                        <span class="text-[12vw] md:text-[8rem] lg:text-[10rem] font-semibold text-white tracking-wide font-geist my-10 drop-shadow-2xl">SURESH</span>
+                    </div>
+                </h1>
+            </div>
+
+            <div class="md:col-span-4 flex flex-col justify-end pb-4 md:pb-8">
+                <div class="glass-panel overflow-hidden animate-slide-up [animation-delay:1.8s] opacity-0 rounded-2xl pt-6 pr-6 pb-6 pl-6 relative shadow-2xl">
+  <div class="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent to-transparent z-0 pointer-events-none animate-shimmer-effect via-white/5">
+  </div>
+  <div class="relative z-10">
+    <p class="text-lg font-light leading-relaxed mb-8 antialiased drop-shadow-md font-geist text-white">
+      Architecting digital realities and scalable pipelines. Merging Full Stack Engineering with immersive XR
+      technologies.
+    </p>
+    <div class="grid grid-cols-2 gap-4 border-t pt-6 mb-6 border-white/10">
+      <div class="">
+        <span class="block text-[10px] uppercase tracking-widest mb-1 font-geist text-white/50"> Location </span>
+        <span class="text-xl font-geist font-semibold tracking-wide text-white">Iowa, USA</span>
+      </div>
+      <div>
+        <span class="block text-[10px] uppercase tracking-widest mb-1 font-geist text-white/50"> Status </span>
+        <span class="text-xl font-geist font-semibold tracking-wide text-white">Open</span>
+      </div>
+    </div>
+    <div class="flex gap-4">
+      <a href="https://linkedin.com/in/kunal--s" target="_blank" class="w-10 h-10 rounded-full border flex items-center justify-center transition-colors border-white/20 hover:bg-white hover:text-black">
+        <iconify-icon icon="solar:link-circle-linear" width="20"></iconify-icon>
+      </a>
+      <a href="https://github.com" target="_blank" class="w-10 h-10 rounded-full border flex items-center justify-center transition-colors border-white/20 hover:bg-white hover:text-black">
+        <iconify-icon icon="solar:code-circle-linear" width="20" class=""></iconify-icon>
+      </a>
+    </div>
+  </div>
+</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- AI Chat Interface -->
+    <section class="bg-neutral-950 border-white/5 border-t pt-12 pb-12 relative">
+        <div class="w-full max-w-4xl mx-auto px-6 relative z-10 animate-on-scroll">
+            <div class="flex items-center gap-3 mb-8 justify-center">
+                <iconify-icon icon="solar:magic-stick-3-linear" class="text-indigo-400"></iconify-icon>
+                <span class="text-xs font-mono uppercase tracking-[0.2em] font-geist text-white/60"> AI Assistant </span>
+            </div>
+            
+            <div class="glass-panel rounded-3xl overflow-hidden shadow-2xl border flex flex-col h-[500px] border-white/10">
+                <!-- Chat Header -->
+                <div class="px-6 py-4 border-b flex items-center justify-between border-white/5 bg-white/5">
+                    <div class="flex items-center gap-3">
+                        <div class="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></div>
+                        <span class="text-sm font-medium font-geist text-white">Ask about Kunal</span>
+                    </div>
+                    <!-- Updated Branding per request -->
+                    <span class="text-[10px] font-mono uppercase tracking-wider flex items-center gap-2 font-geist text-white/40">
+                        <iconify-icon icon="solar:cpu-bolt-linear"></iconify-icon>
+                        Neural RAG Engine v2.0
+                    </span>
+                </div>
+
+                <!-- Chat Body -->
+                <div id="chat-box" class="flex-1 p-6 overflow-y-auto chat-scroll flex flex-col">
+                    <div class="flex w-full justify-start animate-slide-up mb-4">
+                        <div class="border backdrop-blur-md rounded-2xl px-5 py-3 max-w-[80%] text-sm font-light font-geist bg-white/5 border-white/10 text-white/90">
+                            Hi there! I'm an AI assistant trained on Kunal's portfolio. Ask me about his experience, skills, projects, or how to get in touch.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chat Input -->
+                <div class="p-4 border-t bg-neutral-900/50 border-white/5">
+                    <div class="relative flex items-center gap-2">
+                        <input type="text" id="chat-input" placeholder="Ask about experience, skills, or projects..." class="w-full border rounded-xl px-4 py-3 text-sm placeholder-white/30 focus:outline-none focus:border-indigo-500/50 focus:bg-white/10 transition-all bg-white/5 border-white/10 text-white">
+                        <button id="chat-send" class="p-3 rounded-xl hover:bg-indigo-500 transition-colors flex items-center justify-center bg-indigo-600 text-white">
+                            <iconify-icon icon="solar:plain-2-linear" width="20"></iconify-icon>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Experience Section -->
+    <section id="experience" class="relative py-24 overflow-hidden bg-neutral-900">
+        <div class="md:px-12 z-10 w-full max-w-7xl mr-auto ml-auto pr-6 pl-6 relative">
+            
+            <div class="mb-20 animate-on-scroll">
+                <div class="flex gap-3 text-indigo-500 mb-4 gap-x-3 gap-y-3 items-center">
+                    <iconify-icon icon="solar:history-linear" width="18"></iconify-icon>
+                    <span class="text-xs font-mono uppercase tracking-[0.2em] font-geist"> Professional History </span>
+                </div>
+                <h2 class="text-5xl md:text-7xl font-serif font-normal tracking-wide leading-tight word-anim word-reveal text-white"><span style="animation-delay: 0s" class="">Operational&nbsp;Log&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></h2>
+            </div>
+
+            <div class="flex flex-col gap-8 md:gap-12 gap-x-8 gap-y-8">
+                <!-- Job 1 -->
+                <div class="group relative glass-panel rounded-3xl p-8 md:p-12 transition-all duration-500 animate-on-scroll border-l-4 border-l-indigo-500/0 hover:border-l-indigo-500 hover:bg-white/5">
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
+                        <div class="md:col-span-4">
+                            <span class="text-xs font-mono uppercase tracking-widest mb-2 block font-geist text-indigo-400">Nov 2024 - Present</span>
+                            <h3 class="text-3xl md:text-4xl mb-2 font-geist font-semibold tracking-wide text-white">Iowa State University</h3>
+                            <p class="font-light font-geist text-white/60">Graduate Research Assistant</p>
+                            <div class="flex flex-wrap gap-2 mt-4">
+                                <span class="px-3 py-1 rounded-full border text-[10px] uppercase font-geist border-white/10 text-white/50">Python</span>
+                                <span class="px-3 py-1 rounded-full border text-[10px] uppercase font-geist border-white/10 text-white/50">BioPython</span>
+                                <span class="px-3 py-1 rounded-full border text-[10px] uppercase font-geist border-white/10 text-white/50">Bash</span>
+                            </div>
+                        </div>
+                        <div class="md:col-span-8">
+                            <p class="leading-relaxed text-lg font-light font-geist mb-6 text-zinc-50/80">
+                                Built an automated pipeline to identify Genomic Safe Harbors (GSH) in Zebrafish genome. Integrated data from Ensembl, COSMIC, and UCSC. Screened 250K+ loci to flag 42 safe sites, reducing manual curation from 2 months to 45 minutes.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Job 2 -->
+                <div class="group relative glass-panel rounded-3xl p-8 md:p-12 transition-all duration-500 animate-on-scroll border-l-4 border-l-indigo-500/0 hover:border-l-indigo-500 delay-100 hover:bg-white/5">
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
+                        <div class="md:col-span-4">
+                            <span class="text-xs font-mono uppercase tracking-widest mb-2 block font-geist text-indigo-400">Jun 2023 - July 2024</span>
+                            <h3 class="text-3xl md:text-4xl mb-2 font-geist font-semibold tracking-wide text-white">HoloWorld</h3>
+                            <p class="font-light font-geist text-white/60">Software Development Engineer - 1</p>
+                            <div class="flex flex-wrap gap-2 mt-4">
+                                <span class="px-3 py-1 rounded-full border text-[10px] uppercase font-geist border-white/10 text-white/50">Unity3D</span>
+                                <span class="px-3 py-1 rounded-full border text-[10px] uppercase font-geist border-white/10 text-white/50">C#</span>
+                                <span class="px-3 py-1 rounded-full border text-[10px] uppercase font-geist border-white/10 text-white/50">Oculus SDK</span>
+                            </div>
+                        </div>
+                        <div class="md:col-span-8">
+                            <p class="text-lg font-light leading-relaxed mb-6 font-geist text-zinc-50/80">
+                                Built VR simulations for FPV and submersible drones. Deployed for DBSKKV University and Govt. of Maharashtra, training 300+ users. Reduced real-world testing costs by 63%. Designed quadcopter VR experience with immersive controls.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Job 3 -->
+                <div class="group relative glass-panel rounded-3xl p-8 md:p-12 transition-all duration-500 animate-on-scroll border-l-4 border-l-indigo-500/0 hover:border-l-indigo-500 delay-200 hover:bg-white/5">
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
+                        <div class="md:col-span-4">
+                            <span class="text-xs font-mono uppercase tracking-widest mb-2 block font-geist text-indigo-400">Feb 2023 - Apr 2023</span>
+                            <h3 class="text-3xl md:text-4xl mb-2 font-geist font-semibold tracking-wide text-white">Bridge Labs</h3>
+                            <p class="font-light font-geist text-white/60">WebDev Intern</p>
+                            <div class="flex flex-wrap gap-2 mt-4">
+                                <span class="px-3 py-1 rounded-full border text-[10px] uppercase font-geist border-white/10 text-white/50">Django</span>
+                                <span class="px-3 py-1 rounded-full border text-[10px] uppercase font-geist border-white/10 text-white/50">Selenium</span>
+                            </div>
+                        </div>
+                        <div class="md:col-span-8">
+                            <p class="text-lg font-light leading-relaxed mb-6 font-geist text-zinc-50/80">
+                                Built a Django-based web application integrating Google Places/Maps APIs. Aggregated hotel listings from MakeMyTrip and Booking.com, processing 5,000+ listings daily to improve customer search efficiency by 30%.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Projects Section -->
+    <section id="projects" class="relative py-24 border-t bg-neutral-950 border-white/5">
+        <div class="w-full max-w-7xl mx-auto px-6 md:px-12 relative z-10">
+            <div class="flex justify-between items-end mb-16 animate-on-scroll">
+                <div class="">
+                    <div class="flex items-center gap-3 mb-4 text-indigo-500">
+                        <iconify-icon icon="solar:folder-with-files-linear" width="18"></iconify-icon>
+                        <span class="text-xs font-mono uppercase tracking-[0.2em] font-geist"> System Modules </span>
+                    </div>
+                    <h2 class="md:text-6xl text-5xl font-semibold text-white tracking-wide font-geist">Engineered Solutions</h2>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Project 1 -->
+                <div class="group relative rounded-3xl overflow-hidden border hover:border-indigo-500/50 transition-all duration-500 animate-on-scroll bg-neutral-900 border-white/10">
+                    <div class="absolute inset-0 z-0">
+                        <!-- Abstract BG -->
+                        <div class="absolute inset-0 bg-gradient-to-br from-indigo-900/20 to-neutral-950"></div>
+                        <img src="https://images.unsplash.com/photo-1555431189-0fabf2667795?q=80&amp;w=2828&amp;auto=format&amp;fit=crop" class="w-full h-full object-cover opacity-30 group-hover:scale-105 transition-transform duration-1000 mix-blend-overlay">
+                    </div>
+                    <div class="relative z-10 p-8 md:p-12 h-full flex flex-col min-h-[500px] justify-between">
+                        <div class="flex justify-between items-start">
+                            <span class="px-3 py-1 border rounded-full text-[10px] uppercase tracking-widest font-mono backdrop-blur-sm font-geist bg-white/5 border-white/10 text-zinc-50/80"> Data Pipeline </span>
+                            <iconify-icon icon="solar:graph-new-linear" class="text-3xl group-hover:text-indigo-400 transition-colors text-white/40"></iconify-icon>
+                        </div>
+                        <div>
+                            <h3 class="text-3xl mb-4 font-geist font-semibold tracking-wide text-white">Formula 1 Telemetry</h3>
+                            <p class="leading-relaxed mb-6 font-light font-geist text-white/60">
+                                End-to-end data pipeline extracting and visualizing F1 race telemetry. Analyzed 2023-2024 seasons for 10 drivers. Optimized data retrieval for 50% faster computation.
+                            </p>
+                            <div class="flex gap-4 text-xs font-mono uppercase tracking-widest text-indigo-300">
+                                <span class="font-geist">Python</span>
+                                <span class="font-geist">FastF1</span>
+                                <span class="font-geist">Seaborn</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Project 2 -->
+                <div class="group relative rounded-3xl overflow-hidden border hover:border-indigo-500/50 transition-all duration-500 animate-on-scroll delay-100 bg-neutral-900 border-white/10">
+                    <div class="absolute inset-0 z-0">
+                        <div class="absolute inset-0 bg-gradient-to-br from-indigo-900/20 to-neutral-950"></div>
+                        <img src="https://images.unsplash.com/photo-1579684385127-1ef15d508118?q=80&amp;w=2080&amp;auto=format&amp;fit=crop" class="w-full h-full object-cover opacity-30 group-hover:scale-105 transition-transform duration-1000 mix-blend-overlay">
+                    </div>
+                    <div class="relative z-10 p-8 md:p-12 h-full flex flex-col min-h-[500px] justify-between">
+                        <div class="flex justify-between items-start">
+                            <span class="px-3 py-1 border rounded-full text-[10px] uppercase tracking-widest font-mono backdrop-blur-sm font-geist bg-white/5 border-white/10 text-zinc-50/80"> Federated Learning </span>
+                            <iconify-icon icon="solar:eye-scan-linear" class="text-3xl group-hover:text-indigo-400 transition-colors text-white/40"></iconify-icon>
+                        </div>
+                        <div>
+                            <h3 class="text-3xl mb-4 font-geist font-semibold tracking-wide text-white">OCT Disease Classification</h3>
+                            <p class="leading-relaxed mb-6 font-light font-geist text-white/60">
+                                Federated ML system classifying retinal diseases from OCT images. Achieved 93% accuracy on 50k+ samples. Containerized with Docker for edge devices.
+                            </p>
+                            <div class="flex gap-4 text-xs font-mono uppercase tracking-widest text-indigo-300">
+                                <span class="font-geist">ML</span>
+                                <span class="font-geist">Docker</span>
+                                <span class="font-geist">Privacy</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Research & Education Section (Abbreviated for space, keeping key elements) -->
+    <section id="research" class="py-24 border-t overflow-hidden bg-neutral-950 border-white/5">
+        <div class="max-w-7xl mx-auto px-6 md:px-12 relative z-10">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-16">
+                <!-- Education -->
+                <div class="animate-on-scroll">
+                    <div class="flex items-center gap-3 mb-8 text-indigo-500">
+                        <iconify-icon icon="solar:square-academic-cap-linear" width="18"></iconify-icon>
+                        <span class="text-xs font-mono uppercase tracking-[0.2em] font-geist"> Education </span>
+                    </div>
+                    <div class="relative border-l pl-8 space-y-12 border-white/10">
+                        <div class="relative">
+                            <span class="absolute -left-[37px] top-1.5 w-4 h-4 rounded-full border-2 border-indigo-500 shadow-[0_0_10px_#6366f1] bg-neutral-950"></span>
+                            <span class="text-xs font-mono block mb-2 font-geist text-white/40">Current</span>
+                            <h3 class="text-2xl font-geist font-semibold tracking-wide text-white">Master of Science, Computer Science</h3>
+                            <p class="mt-1 font-geist text-white/60">Iowa State University</p>
+                        </div>
+                        <div class="relative">
+                            <span class="absolute -left-[37px] top-1.5 w-4 h-4 rounded-full border bg-neutral-950 border-white/20"></span>
+                            <span class="text-xs font-mono block mb-2 font-geist text-white/40">2023</span>
+                            <h3 class="text-2xl font-geist font-semibold tracking-wide text-white">Bachelor of Engineering, CSE</h3>
+                            <p class="mt-1 font-geist text-white/60">Vidyavardhaka College of Engineering</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- Research -->
+                <div class="animate-on-scroll delay-200">
+                    <div class="flex items-center gap-3 mb-8 text-indigo-500">
+                        <iconify-icon icon="solar:document-text-linear" width="18"></iconify-icon>
+                        <span class="text-xs font-mono uppercase tracking-[0.2em] font-geist"> Publications </span>
+                    </div>
+                    <div class="flex flex-col gap-4">
+                        <a href="#" class="group p-6 glass-panel rounded-2xl transition-all hover:bg-white/5">
+                            <div class="flex items-start gap-4">
+                                <iconify-icon icon="solar:book-bookmark-linear" class="mt-1 shrink-0 text-white/40"></iconify-icon>
+                                <div>
+                                    <h4 class="font-medium mb-2 group-hover:text-indigo-400 transition-colors font-geist text-white">Detection Of Diabetic Retinopathy Using Deep Learning</h4>
+                                    <p class="text-xs font-mono uppercase font-geist text-white/40">Published in Springer Journal</p>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Skills Section -->
+    <section id="skills" class="py-24 bg-neutral-900">
+        <div class="max-w-7xl mx-auto px-6 md:px-12 relative z-10">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+                <div class="animate-on-scroll">
+                    <h3 class="text-3xl mb-8 font-geist font-semibold tracking-wide text-white">Technical Arsenal</h3>
+                    <div class="space-y-6">
+                        <div>
+                            <div class="flex justify-between text-sm mb-2 text-white/60"><span class="font-geist">Languages</span><span class="font-geist text-white">Python, C#, Kotlin</span></div>
+                            <div class="h-1 w-full rounded-full overflow-hidden bg-white/10"><div class="h-full bg-indigo-500 w-[90%] shadow-[0_0_10px_#6366f1]"></div></div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-sm mb-2 text-white/60"><span class="font-geist">Platforms</span><span class="font-geist text-white">Android, AI, ML, Unity3D</span></div>
+                            <div class="h-1 w-full rounded-full overflow-hidden bg-white/10"><div class="h-full bg-indigo-500 w-[85%] shadow-[0_0_10px_#6366f1]"></div></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="glass-panel rounded-3xl p-8 animate-on-scroll delay-100">
+                    <h3 class="text-2xl mb-6 font-geist font-semibold tracking-wide text-white">Achievements</h3>
+                    <ul class="space-y-4">
+                        <li class="flex gap-3 items-start font-light text-sm text-white/70"><iconify-icon icon="solar:cup-star-linear" class="text-lg shrink-0 mt-0.5 text-indigo-400"></iconify-icon><span class="font-geist">Winner, Smart India Hackathon 2023.</span></li>
+                        <li class="flex gap-3 items-start font-light text-sm text-white/70"><iconify-icon icon="solar:medal-ribbon-linear" class="text-lg shrink-0 mt-0.5 text-indigo-400"></iconify-icon><span class="font-geist">Best Student Achiever, VVCE CSE Department.</span></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Q&A Section -->
+    <section id="qa" class="py-24 border-t relative bg-neutral-950 border-white/5">
+        <div class="max-w-3xl mx-auto px-6 relative z-10 animate-on-scroll">
+            <div class="text-center mb-16">
+                <div class="flex items-center justify-center gap-3 mb-4 text-indigo-500">
+                    <iconify-icon icon="solar:question-circle-linear" width="18"></iconify-icon>
+                    <span class="text-xs font-mono uppercase tracking-[0.2em] font-geist"> Q&amp;A </span>
+                </div>
+                <h2 class="text-4xl md:text-5xl font-geist font-semibold tracking-wide text-white">Frequently Asked</h2>
+            </div>
+            
+            <div class="space-y-4">
+                <!-- Question 1 -->
+                <div class="glass-panel rounded-2xl overflow-hidden border border-white/5">
+                    <button class="accordion-btn w-full px-6 py-5 flex items-center justify-between text-left transition-colors hover:bg-white/5">
+                        <span class="text-lg font-medium font-geist text-white/90">What is your primary tech stack?</span>
+                        <iconify-icon icon="solar:alt-arrow-down-linear" class="transition-transform duration-300 text-white/40"></iconify-icon>
+                    </button>
+                    <div class="accordion-content bg-neutral-900/50">
+                        <div class="px-6 pb-6 pt-2 font-light leading-relaxed font-geist text-white/60">
+                            I primarily work with Python for data science and backend development (Django), and C# with Unity3D for XR/VR applications. I also have strong experience with cloud tools like Docker and Firebase.
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Question 2 -->
+                <div class="glass-panel rounded-2xl overflow-hidden border border-white/5">
+                    <button class="accordion-btn w-full px-6 py-5 flex items-center justify-between text-left transition-colors hover:bg-white/5">
+                        <span class="text-lg font-medium font-geist text-white/90">Are you open to freelance XR projects?</span>
+                        <iconify-icon icon="solar:alt-arrow-down-linear" class="transition-transform duration-300 text-white/40"></iconify-icon>
+                    </button>
+                    <div class="accordion-content bg-neutral-900/50">
+                        <div class="px-6 pb-6 pt-2 font-light leading-relaxed font-geist text-white/60">
+                            Yes, I am open to freelance or contract opportunities involving VR simulation, AR applications, or game development using Unity and Oculus SDKs.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Question 3 -->
+                <div class="glass-panel rounded-2xl overflow-hidden border border-white/5">
+                    <button class="accordion-btn w-full px-6 py-5 flex items-center justify-between text-left transition-colors hover:bg-white/5">
+                        <span class="text-lg font-medium font-geist text-white/90">Do you have experience with Machine Learning?</span>
+                        <iconify-icon icon="solar:alt-arrow-down-linear" class="transition-transform duration-300 text-white/40"></iconify-icon>
+                    </button>
+                    <div class="accordion-content bg-neutral-900/50">
+                        <div class="px-6 pb-6 pt-2 font-light leading-relaxed font-geist text-white/60">
+                            Absolutely. My research at Iowa State and internship at IIT Kanpur involved building ML pipelines, Federated Learning systems, and working with large datasets using Apache Spark.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Me Section -->
+    <section id="contact" class="py-24 border-t relative bg-neutral-900 border-white/5">
+        <div class="max-w-4xl mx-auto px-6 relative z-10 animate-on-scroll">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                <div>
+                    <div class="flex items-center gap-3 mb-4 text-indigo-500">
+                        <iconify-icon icon="solar:mailbox-linear" width="18"></iconify-icon>
+                        <span class="text-xs font-mono uppercase tracking-[0.2em] font-geist"> Get in Touch </span>
+                    </div>
+                    <h2 class="text-4xl md:text-5xl mb-6 font-geist font-semibold tracking-wide text-white">Let's build something impossible.</h2>
+                    <p class="font-light leading-relaxed mb-8 font-geist text-white/60">
+                        Whether you have a question about my research, a project proposal, or just want to say hi, I'll try my best to get back to you.
+                    </p>
+                    <div class="flex flex-col gap-4">
+                        <a href="mailto:kunalsuresh25@gmail.com" class="flex items-center gap-4 p-4 glass-panel rounded-xl transition-all group hover:bg-white/5">
+                            <div class="w-10 h-10 rounded-full flex items-center justify-center group-hover:bg-indigo-500/20 group-hover:text-indigo-400 transition-colors bg-white/5">
+                                <iconify-icon icon="solar:letter-linear" class="text-xl"></iconify-icon>
+                            </div>
+                            <div>
+                                <span class="block text-xs font-mono uppercase font-geist text-white/40">Email Me</span>
+                                <span class="font-geist text-white">kunalsuresh25@gmail.com</span>
+                            </div>
+                        </a>
+                        <a href="https://linkedin.com/in/kunal--s" target="_blank" class="flex items-center gap-4 p-4 glass-panel rounded-xl transition-all group hover:bg-white/5">
+                            <div class="w-10 h-10 rounded-full flex items-center justify-center group-hover:bg-indigo-500/20 group-hover:text-indigo-400 transition-colors bg-white/5">
+                                <iconify-icon icon="solar:link-circle-linear" class="text-xl"></iconify-icon>
+                            </div>
+                            <div>
+                                <span class="block text-xs font-mono uppercase font-geist text-white/40">Connect</span>
+                                <span class="font-geist text-white">LinkedIn Profile</span>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="glass-panel rounded-3xl p-8 border border-white/10">
+                    <form id="contact-form" class="space-y-6">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="space-y-2">
+                                <label class="text-xs font-mono uppercase font-geist text-white/60">First Name <span class="text-indigo-500 font-geist">*</span></label>
+                                <input type="text" required="" class="input-base w-full rounded-lg px-4 py-3 text-sm text-white" placeholder="John">
+                            </div>
+                            <div class="space-y-2">
+                                <label class="text-xs font-mono uppercase font-geist text-white/60">Last Name</label>
+                                <input type="text" class="input-base w-full rounded-lg px-4 py-3 text-sm text-white" placeholder="Doe">
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-2">
+                            <label class="text-xs font-mono uppercase font-geist text-white/60">Email <span class="text-indigo-500 font-geist">*</span></label>
+                            <input type="email" required="" class="input-base w-full rounded-lg px-4 py-3 text-sm text-white" placeholder="john@example.com">
+                        </div>
+
+                        <div class="space-y-2">
+                            <label class="text-xs font-mono uppercase font-geist text-white/60">Message <span class="text-indigo-500 font-geist">*</span></label>
+                            <textarea required="" rows="4" class="input-base w-full rounded-lg px-4 py-3 text-sm resize-none text-white" placeholder="Tell me about your project..."></textarea>
+                        </div>
+
+                        <button id="submit-btn" type="submit" class="w-full py-4 rounded-lg font-medium hover:bg-indigo-500 transition-all duration-300 flex items-center justify-center gap-2 font-geist bg-white text-neutral-950 hover:text-white">
+                            Send Message
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 3D Mini Game Section -->
+    <section id="cyber-game" class="relative py-0 h-[500px] w-full overflow-hidden border-t bg-neutral-950 border-white/5">
+        <div class="absolute inset-0 z-10 flex flex-col items-center justify-center backdrop-blur-[2px] bg-black/40" id="game-overlay">
+            <h3 class="text-4xl mb-2 font-geist font-semibold tracking-wide text-white">CYBER SURF 3D</h3>
+            <p class="mb-6 text-sm font-mono font-geist text-white/60">Avoid Red Obstacles • Collect Indigo Data</p>
+            <button id="game-start-btn" class="px-8 py-3 font-semibold rounded-full hover:bg-indigo-500 transition-all duration-300 flex items-center gap-2 font-geist bg-white text-black hover:text-white">
+                <iconify-icon icon="solar:play-circle-linear" class="text-xl"></iconify-icon>
+                Initialize System
+            </button>
+        </div>
+        
+        <div class="absolute top-4 left-4 z-20 flex gap-4">
+            <div class="px-4 py-2 glass-panel rounded-full text-xs font-mono font-geist text-white">
+                SCORE: <span id="game-score" class="font-bold font-geist text-indigo-400">0</span>
+            </div>
+        </div>
+
+        <div class="scanline"></div>
+        <canvas id="game-canvas" class="cursor-none" width="1073" height="499"></canvas>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-12 border-t text-center relative z-10 border-white/5 bg-neutral-950">
+        <p class="text-xs font-mono tracking-widest uppercase mb-4 font-geist text-white/30">
+            End of Transmission
+        </p>
+        <p class="text-lg font-geist text-white">Kunal Suresh © 2024</p>
+    </footer>
+
+
+</body></html>
